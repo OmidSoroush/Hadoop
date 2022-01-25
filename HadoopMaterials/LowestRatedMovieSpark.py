@@ -5,11 +5,14 @@ from pyspark import SparkConf, SparkContext
 # the final results.
 def loadMovieNames():
     movieNames = {}
-    with open("ml-100k/u.item") as f:
+    with open("ml-100k/u.item", encoding="ISO-8859-1") as f:
         for line in f:
             fields = line.split('|')
             movieNames[int(fields[0])] = fields[1]
     return movieNames
+
+movieNames = loadMovieNames()
+
 
 # Take each line of u.data and convert it to (movieID, (rating, 1.0))
 # This way we can then add up all the ratings for each movie, and
