@@ -4,7 +4,7 @@ from pyspark.sql import functions
 
 def loadMovieNames():
     movieNames = {}
-    with open("ml-100k/u.item") as f:
+    with open("ml-100k/u.item", encoding="ISO-8859-1") as f:
         for line in f:
             fields = line.split('|')
             movieNames[int(fields[0])] = fields[1]
@@ -22,7 +22,7 @@ if __name__ == "__main__":
     movieNames = loadMovieNames()
 
     # Get the raw data
-    lines = spark.sparkContext.textFile("hdfs:///user/maria_dev/ml-100k/u.data")
+    lines = spark.sparkContext.textFile("ml-100k/u.data")
     # Convert it to a RDD of Row objects with (movieID, rating)
     movies = lines.map(parseInput)
     # Convert that to a DataFrame
@@ -34,8 +34,10 @@ if __name__ == "__main__":
     # Compute count of ratings for each movieID
     counts = movieDataset.groupBy("movieID").count()
 
+    countsFiltered = counts.filter("count > 10")
+
     # Join the two together (We now have movieID, avg(rating), and count columns)
-    averagesAndCounts = counts.join(averageRatings, "movieID")
+    averagesAndCounts = countsFiltered.join(averageRatings, "movieID")
 
     # Pull the top 10 results
     topTen = averagesAndCounts.orderBy("avg(rating)").take(10)

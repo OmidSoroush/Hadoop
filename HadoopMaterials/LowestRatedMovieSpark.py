@@ -1,9 +1,10 @@
+
 from pyspark import SparkConf, SparkContext
 
 # This function just creates a Python "dictionary" we can later
 # use to convert movie ID's to movie names while printing out
 # the final results.
-def loadMovieNames():
+def loadMovieNames() -> object:
     movieNames = {}
     with open("ml-100k/u.item", encoding="ISO-8859-1") as f:
         for line in f:
@@ -11,7 +12,6 @@ def loadMovieNames():
             movieNames[int(fields[0])] = fields[1]
     return movieNames
 
-movieNames = loadMovieNames()
 
 
 # Take each line of u.data and convert it to (movieID, (rating, 1.0))
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     movieNames = loadMovieNames()
 
     # Load up the raw u.data file
-    lines = sc.textFile("hdfs:///user/maria_dev/ml-100k/u.data")
+    lines = sc.textFile("ml-100k/u.data")
 
     # Convert to (movieID, (rating, 1.0))
     movieRatings = lines.map(parseInput)
@@ -38,6 +38,8 @@ if __name__ == "__main__":
     # Reduce to (movieID, (sumOfRatings, totalRatings))
     ratingTotalsAndCount = movieRatings.reduceByKey(lambda movie1, movie2: ( movie1[0] + movie2[0], movie1[1] + movie2[1] ) )
 
+    ratingFiltered = ratingTotalsAndCount.filter(lambda x: x[1][1] > 10)
+    
     # Map to (movieID, averageRating)
     averageRatings = ratingTotalsAndCount.mapValues(lambda totalAndCount : totalAndCount[0] / totalAndCount[1])
 
