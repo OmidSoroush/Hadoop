@@ -11,7 +11,7 @@ if (ratings.exists()):
 ratings.create('rating')
 
 print("Parsing the ml-100k ratings data...\n")
-ratingFile = open("e:/Downloads/ml-100k/ml-100k/u.data", "r")
+ratingFile = open("/Users/omidsoroush/Downloads/ml-100k/u.data", "r")
 
 batch = ratings.batch()
 
